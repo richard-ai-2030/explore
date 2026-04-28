@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+        monitoring: enabled
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '7000'
+    spec:
+      containers:
+      - name: auth-service
+        image: auth-service:version3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7000
+        env:
+        - name: DEFAULT_ROLE
+          value: auth_service
+        - name: PORT
+          value: '7000'
+        - name: JWT_SECRET
+          value: v3-jwt-4f7c2a9e1b6d8f0c-secure-rotated-2026-04        
+        - name: POSTGRES_HOST
+          value: 172.19.0.5
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: auth_service
+        - name: REDIS_URL
+          value: "redis://172.19.0.6:6379/0"
+        - name: REDIS_PREFIX
+          value: "auth-service"
+        - name: DEFAULT_CACHE_TTL_SECONDS
+          value: "600"
+        - name: KAFKA_ENABLED
+          value: 'true'
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: 172.19.0.7:9092
+        - name: KAFKA_EVENTS_TOPIC
+          value: explore.events
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: explore
+  labels:
+    app: auth-service
+    monitoring: enabled
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - name: http
+    port: 7000
+    targetPort: 7000

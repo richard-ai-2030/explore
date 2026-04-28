@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: platform-protected-ingress
+  namespace: explore
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/auth-url: "http://auth-service.explore.svc.cluster.local:7000/ingress/auth"
+    nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-User-Id,X-Auth-User-Email,X-Auth-User-Name,X-Auth-Scopes,X-Auth-Identity-Source
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/marketing(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bff-marketing
+                port:
+                  number: 7010
+          - path: /api/production(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bff-production
+                port:
+                  number: 7011
+          - path: /api/talents(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bff-talents
+                port:
+                  number: 7012

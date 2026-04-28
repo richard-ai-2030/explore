@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: app-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: marketing-http
+      rules:
+        - alert: MarketingServiceHighErrorRate
+          expr: |
+            sum(rate(app_http_requests_total{service=~"bff-marketing|auth-service|campaign-service|leads-acquisition-service|tracking-service|scoring-service|hot-lead-service|analytics-service|notification-service",status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(app_http_requests_total{service=~"bff-marketing|auth-service|campaign-service|leads-acquisition-service|tracking-service|scoring-service|hot-lead-service|analytics-service|notification-service"}[5m])), 0.1)
+            > 0.05
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Marketing service high 5xx error rate
+            description: 5xx rate exceeded 5 percent for 10 minutes.
+        - alert: MarketingServiceHighLatencyP95
+          expr: histogram_quantile(0.95, sum by (le, service) (rate(app_http_request_duration_seconds_bucket{service=~"bff-marketing|auth-service|campaign-service|leads-acquisition-service|tracking-service|scoring-service|hot-lead-service|analytics-service|notification-service"}[5m]))) > 1.0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Marketing service high latency
+            description: p95 latency exceeded 1 second for 10 minutes.

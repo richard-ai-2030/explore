@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-marketing-services
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  marketing-services.json: |
+    {
+      "title": "Marketing Services - Latency and RPS",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 2,
+      "refresh": "15s",
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Requests / second by service",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [{ "expr": "sum by (service) (rate(app_http_requests_total{service=~\"bff-marketing|auth-service|campaign-service|leads-acquisition-service|tracking-service|scoring-service|hot-lead-service|analytics-service|notification-service\"}[5m]))", "legendFormat": "{{service}}" }]
+        },
+        {
+          "type": "timeseries",
+          "title": "p95 latency by service (seconds)",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum by (le, service) (rate(app_http_request_duration_seconds_bucket{service=~\"bff-marketing|auth-service|campaign-service|leads-acquisition-service|tracking-service|scoring-service|hot-lead-service|analytics-service|notification-service\"}[5m])))", "legendFormat": "{{service}}" }]
+        },
+        {
+          "type": "timeseries",
+          "title": "5xx error rate by service",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "targets": [{ "expr": "sum by (service) (rate(app_http_requests_total{service=~\"bff-marketing|auth-service|campaign-service|leads-acquisition-service|tracking-service|scoring-service|hot-lead-service|analytics-service|notification-service\",status=~\"5..\"}[5m]))", "legendFormat": "{{service}}" }]
+        }
+      ]
+    }

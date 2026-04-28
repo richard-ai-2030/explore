@@ -1,0 +1,1 @@
+{"name":"production-app","private":true,"scripts":{"dev":"vite --host 0.0.0.0 --port 5173","build":"vite build"},"dependencies":{"vue":"3.5.12"},"devDependencies":{"vite":"5.4.10","@vitejs/plugin-vue":"5.1.4"}}

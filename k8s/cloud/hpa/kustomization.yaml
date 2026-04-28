@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - auth-service-hpa.yaml
+  - bff-marketing-hpa.yaml
+  - bff-talents-hpa.yaml
+  - bff-production-hpa.yaml
+  - notification-service-hpa.yaml
+
+  - bff-marketing-hpa.yaml
+  - campaign-service-hpa.yaml
+  - hot-lead-service-hpa.yaml
+  - leads-acquisition-service-hpa.yaml
+  - scoring-service-hpa.yaml
+  - tracking-service-hpa.yaml
+  
+  - bff-production-hpa.yaml
+  - analytics-service-hpa.yaml
+  - kie-service-hpa.yaml
+
+  - cost-service-hpa.yaml
+  - inventory-service-hpa.yaml
+  - invoice-service-hpa.yaml
+
+  - logistics-service-hpa.yaml
+  - order-service-hpa.yaml
+  - payment-service-hpa.yaml
+  - procurement-service-hpa.yaml
+  - quality-service-hpa.yaml
+  - quotation-service-hpa.yaml
+  - revenue-service-hpa.yaml
+  - supplier-service-hpa.yaml
+
+  - bff-talents-hpa.yaml
+  - recruitment-service-hpa.yaml
+  - employees-service-hpa.yaml
+  - attendance-service-hpa.yaml
+  - motivation-service-hpa.yaml
+  - payroll-service-hpa.yaml

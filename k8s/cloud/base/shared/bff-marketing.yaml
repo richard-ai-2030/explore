@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-marketing
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-marketing
+  template:
+    metadata:
+      labels:
+        app: bff-marketing
+        monitoring: enabled
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '7010'
+    spec:
+      containers:
+      - name: bff-marketing
+        image: bff-marketing:version3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7010
+        env:
+        - name: PORT
+          value: '7010'
+        - name: ANALYTICS_SERVICE_URL
+          value: http://analytics-service:7002
+        - name: NOTIFICATION_SERVICE_URL
+          value: http://notification-service:7001
+        - name: LEADS_ACQUISITION_SERVICE_URL
+          value: http://leads-acquisition-service:7101
+        - name: CAMPAIGN_SERVICE_URL
+          value: http://campaign-service:7102
+        - name: SCORING_SERVICE_URL
+          value: http://scoring-service:7103
+        - name: TRACKING_SERVICE_URL
+          value: http://tracking-service:7104
+        - name: HOT_LEAD_SERVICE_URL
+          value: http://hot-lead-service:7111
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-marketing
+  namespace: explore
+  labels:
+    app: bff-marketing
+    monitoring: enabled
+spec:
+  selector:
+    app: bff-marketing
+  ports:
+  - name: http
+    port: 7010
+    targetPort: 7010

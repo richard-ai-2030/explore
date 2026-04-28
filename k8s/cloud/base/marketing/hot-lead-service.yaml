@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hot-lead-service
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hot-lead-service
+  template:
+    metadata:
+      labels:
+        app: hot-lead-service
+        monitoring: enabled
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '7111'
+    spec:
+      containers:
+      - name: hot-lead-service
+        image: hot-lead-service:version3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7111
+        env:
+        - name: PORT
+          value: '7111'
+        - name: POSTGRES_HOST
+          value: 172.19.0.5
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: hot_lead_service
+        - name: KAFKA_ENABLED
+          value: 'true'
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: host.docker.internal:9092
+        - name: KAFKA_EVENTS_TOPIC
+          value: explore.events
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hot-lead-service
+  namespace: explore
+  labels:
+    app: hot-lead-service
+    monitoring: enabled
+spec:
+  selector:
+    app: hot-lead-service
+  ports:
+  - name: http
+    port: 7111
+    targetPort: 7111

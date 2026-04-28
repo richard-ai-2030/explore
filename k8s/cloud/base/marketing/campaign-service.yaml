@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campaign-service
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: campaign-service
+  template:
+    metadata:
+      labels:
+        app: campaign-service
+        monitoring: enabled
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '7102'
+    spec:
+      containers:
+      - name: campaign-service
+        image: campaign-service:version3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7102
+        env:
+        - name: PORT
+          value: '7102'
+        - name: POSTGRES_HOST
+          value: 172.19.0.5
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: campaign_service
+        - name: KAFKA_ENABLED
+          value: 'true'
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: host.docker.internal:9092
+        - name: KAFKA_EVENTS_TOPIC
+          value: explore.events
+        - name: DEFAULT_OWNER_EMAIL
+          value: marketing@gmai.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campaign-service
+  namespace: explore
+  labels:
+    app: campaign-service
+    monitoring: enabled
+spec:
+  selector:
+    app: campaign-service
+  ports:
+  - name: http
+    port: 7102
+    targetPort: 7102

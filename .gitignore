@@ -1,0 +1,6 @@
+.git
+.terraform/
+.next/
+node_modules/
+*.pyc
+__pycache__/

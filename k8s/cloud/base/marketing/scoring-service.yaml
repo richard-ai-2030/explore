@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scoring-service
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scoring-service
+  template:
+    metadata:
+      labels:
+        app: scoring-service
+        monitoring: enabled
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '7103'
+    spec:
+      containers:
+      - name: scoring-service
+        image: scoring-service:version3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7103
+        env:
+        - name: PORT
+          value: '7103'
+        - name: POSTGRES_HOST
+          value: 172.19.0.5
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: scoring_service
+        - name: KAFKA_ENABLED
+          value: 'true'
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: host.docker.internal:9092
+        - name: KAFKA_EVENTS_TOPIC
+          value: explore.events
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scoring-service
+  namespace: explore
+  labels:
+    app: scoring-service
+    monitoring: enabled
+spec:
+  selector:
+    app: scoring-service
+  ports:
+  - name: http
+    port: 7103
+    targetPort: 7103

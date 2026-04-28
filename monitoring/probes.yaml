@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: marketing-public-health
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  interval: 30s
+  module: http_2xx
+  prober:
+    url: http://blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - http://bff-marketing.explore.svc.cluster.local:7010/health
+        - http://auth-service.explore.svc.cluster.local:7000/health
+        - http://campaign-service.explore.svc.cluster.local:7102/health
+        - http://leads-acquisition-service.explore.svc.cluster.local:7101/health
+        - http://tracking-service.explore.svc.cluster.local:7104/health
+        - http://scoring-service.explore.svc.cluster.local:7103/health
+        - http://hot-lead-service.explore.svc.cluster.local:7111/health
+        - http://analytics-service.explore.svc.cluster.local:7002/health
+        - http://notification-service.explore.svc.cluster.local:7001/health

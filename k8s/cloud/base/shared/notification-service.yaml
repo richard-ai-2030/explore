@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+        monitoring: enabled
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '7001'
+    spec:
+      containers:
+      - name: notification-service
+        image: notification-service:version3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7001
+        env:
+        - name: PORT
+          value: '7001'
+        - name: POSTGRES_HOST
+          value: 172.19.0.5
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: notification_service
+        - name: KAFKA_ENABLED
+          value: 'true'
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: 172.19.0.7:9092
+        - name: KAFKA_EVENTS_TOPIC
+          value: explore.events
+        - name: KAFKA_CONSUMER_GROUP
+          value: notification-service-group
+        - name: NOTIFICATION_EVENT_TYPES
+          value: auth.user.registered,marketing.campaign.launch,marketing.hot_lead.raised,marketing.lead.unsubscribed
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: explore
+  labels:
+    app: notification-service
+    monitoring: enabled
+spec:
+  selector:
+    app: notification-service
+  ports:
+  - name: http
+    port: 7001
+    targetPort: 7001

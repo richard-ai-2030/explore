@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-talents
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-talents
+  template:
+    metadata:
+      labels:
+        app: bff-talents
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7012"
+    spec:
+      containers:
+        - name: bff-talents
+          image: bff-talents:version3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7012
+          env:
+            - name: REDIS_URL
+              value: "redis://172.19.0.6:6379/0"
+            - name: REDIS_PREFIX
+              value: "bff-talents"
+            - name: DEFAULT_CACHE_TTL_SECONDS
+              value: "600"
+            - name: PORT
+              value: "7012"
+            - name: ANALYTICS_SERVICE_URL
+              value: "http://analytics-service:7002"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:7001"
+            - name: KIE_SERVICE_URL
+              value: "http://kie-service:7003"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-talents
+  namespace: explore
+spec:
+  selector:
+    app: bff-talents
+  ports:
+    - name: http
+      port: 7012
+      targetPort: 7012

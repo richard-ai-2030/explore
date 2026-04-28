@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-production
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-production
+  template:
+    metadata:
+      labels:
+        app: bff-production
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7011"
+    spec:
+      containers:
+        - name: bff-production
+          image: bff-production:version3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7011
+          env:
+            - name: PORT
+              value: "7011"
+            - name: ANALYTICS_SERVICE_URL
+              value: "http://analytics-service:7002"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:7001"
+            - name: KIE_SERVICE_URL
+              value: "http://kie-service:7003"
+            - name: REDIS_URL
+              value: "redis://172.19.0.6:6379/0"
+            - name: REDIS_PREFIX
+              value: "bff-production"
+            - name: DEFAULT_CACHE_TTL_SECONDS
+              value: "600"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-production
+  namespace: explore
+spec:
+  selector:
+    app: bff-production
+  ports:
+    - name: http
+      port: 7011
+      targetPort: 7011

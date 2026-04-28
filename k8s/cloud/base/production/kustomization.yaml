@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - inventory-service.yaml
+  - logistics-service.yaml
+  - order-service.yaml
+  - procurement-service.yaml
+  - quality-service.yaml
+  - quotation-service.yaml
+  - supplier-service.yaml

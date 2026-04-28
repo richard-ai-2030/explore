@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: procurement-service
+  namespace: explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: procurement-service
+  template:
+    metadata:
+      labels:
+        app: procurement-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7122"
+    spec:
+      containers:
+        - name: procurement-service
+          image: procurement-service:version3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7122
+          env:
+            - name: REDIS_URL
+              value: "redis://172.19.0.6:6379/0"
+            - name: REDIS_PREFIX
+              value: "procurement-service"
+            - name: DEFAULT_CACHE_TTL_SECONDS
+              value: "600"
+            - name: PORT
+              value: "7122"
+            - name: POSTGRES_HOST
+              value: "172.19.0.1"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+            - name: POSTGRES_DB
+              value: "procurement_service"
+            - name: KAFKA_ENABLED
+              value: "true"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "172.19.0.1:9092"
+            - name: KAFKA_EVENTS_TOPIC
+              value: "explore.events"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: procurement-service
+  namespace: explore
+spec:
+  selector:
+    app: procurement-service
+  ports:
+    - name: http
+      port: 7122
+      targetPort: 7122
