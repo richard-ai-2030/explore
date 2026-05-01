@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE_REGISTRY="${IMAGE_REGISTRY:-GitHub.images.registry.explore}"
-IMAGE_TAG="${IMAGE_TAG:-version3}"
-CLUSTER_TYPE="${CLUSTER_TYPE:-kind}"
-CLUSTER_NAME="${CLUSTER_NAME:-staging}"
+PULL_IMAGES="false"
+IMAGE_REGISTRY="ghcr.io/richard-ai-2030"
+IMAGE_TAG="version3"
 
-# ✅ Get domain from argument
+CLUSTER_TYPE="kind"
+CLUSTER_NAME="staging"
+
 DOMAIN="${1:-}"
 
 if [ -z "$DOMAIN" ]; then
@@ -26,6 +27,11 @@ load_kind_image() {
   local image="$1"
   echo "==> kind load docker-image ${image} --name ${CLUSTER_NAME}"
   kind load docker-image "${image}" --name "${CLUSTER_NAME}"
+  
+  if [ "$PULL_IMAGES" = "true" ]; then    
+    docker pull "${IMAGE_REGISTRY}/${image}:${IMAGE_TAG}"
+    docker tag "${IMAGE_REGISTRY}/${image}:${IMAGE_TAG}" "${image}:${IMAGE_TAG}"
+  fi
 }
 
 load_k3d_image() {
@@ -54,8 +60,8 @@ load_image() {
 
 resolve_image_name() {
   local name="$1"
-  echo "${name}:${IMAGE_TAG}"
-  # echo "${IMAGE_REGISTRY}/${name}:${IMAGE_TAG}"
+  name="${name}:${IMAGE_TAG}"
+  echo "${name}"
 }
 
 echo "Scanning ${TARGET_DIR}/ ..."

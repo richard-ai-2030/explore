@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE_TAG="${IMAGE_TAG:-version3}"
-PUSH_IMAGES="${PUSH_IMAGES:-false}"
-IMAGE_REGISTRY="${IMAGE_REGISTRY:-GitHub.images.registry.explore}"
+PUSH_IMAGES="false"
+IMAGE_REGISTRY="ghcr.io/richard-ai-2030"
+IMAGE_TAG="version3"
 
-# ✅ Get domain from argument
 DOMAIN="${1:-}"
 
 if [ -z "$DOMAIN" ]; then
@@ -30,6 +29,7 @@ build_and_push() {
 
   if [ "$PUSH_IMAGES" = "true" ]; then
     echo "==> Pushing ${IMAGE_REGISTRY}/${name}:${IMAGE_TAG}"
+    docker tag "${name}:${IMAGE_TAG}" "${IMAGE_REGISTRY}/${name}:${IMAGE_TAG}"
     docker push "${IMAGE_REGISTRY}/${name}:${IMAGE_TAG}"
   fi
 }

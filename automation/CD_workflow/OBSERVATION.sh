@@ -1,19 +1,52 @@
-kubectl get events -n explore --sort-by=.lastTimestamp | tail -n 25     # logs at Kubernetes level
-kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx   # API Gateway → [routing rules → rate limitting] → Pod
+# OBSERVE REDIS
+docker exec -it redis redis-cli MONITOR                         # execute command in an existing Docker container
+  docker logs -f redis        #docker logs --tail 20 redis
 
-kubectl get pods -o wide -n ingress-nginx
-kubectl get ingress -n explore
+kubectl run redis --rm -it --image=redis:7-alpine -- sh         # create a Debug pod in Kubernetes
+  redis-cli -h 172.19.0.6 MONITOR
+  redis-cli -h 172.19.0.6 -p 6379
+    SET test:key "hello"         GET test:key        DEL test:key
 
-kubectl port-forward -n explore "svc/auth-service" "7000:7000"              # bypass Ingress controller
-  curl http://127.0.0.1:7000/health
+# OBSERVE KAFKA
+# create a Docker container then execute observing Kafka Consumer
+docker run -it --rm --network explore_infra_net confluentinc/cp-kafka:latest bash
+  kafka-console-consumer --bootstrap-server kafka:29092 --topic explore.events
+
+# execute Producing in an existing Docker container
+docker exec -it kafka     kafka-console-producer --bootstrap-server kafka:29092 --topic explore.events
+  docker logs -f kafka        docker logs --tail 20 kafka
 
 
-# execute a command inside a Pod
+kubectl run kafka --rm -it --restart=Never --image=confluentinc/cp-kafka:latest bash
+  kafka-console-consumer --bootstrap-server 172.19.0.7:9092 --topic explore.events
+
+kubectl run kafkaproducer --rm -it --restart=Never --image=confluentinc/cp-kafka:latest --command --   \
+  kafka-console-producer --bootstrap-server 172.19.0.7:9092 --topic explore.events
+
+
+# OBSERVE POSTGRES  
+kubectl run postgres   --rm -it   --restart=Never   --image=postgres:16-alpine   --env="PGPASSWORD=postgres"   --command --   \
+psql -h 172.19.0.5 -U postgres -d notification_service \
+-c "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 1"
+
+kubectl run postgres   --rm -it   --restart=Never   --image=postgres:16-alpine   --env="PGPASSWORD=postgres"   --command --   \
+psql -h 172.19.0.5 -U postgres -d auth_service \
+-c "SELECT * FROM outbox_events ORDER BY created_at DESC LIMIT 1"
+-c "\dt"
+  
+  docker exec -it postgres psql -U postgres
+  #psql -h localhost -p 5432 -U postgres
+
+
+#-------------- execute a command inside a Kubernetes running auth-service Pod ------------------
 kubectl exec -it auth-service-75799cb866-25wlz -n explore -- /bin/bash
   apt update && apt install curl iputils-ping -y
-
 
 # view Pod's log
 kubectl logs -f deployment/auth-service -n explore
 kubectl logs -n explore $(kubectl get pods -n explore | grep auth-service | awk '{print $1}' | head -n 1)
 
+  #kubectl describe deployment auth-service -n explore
+  #kubectl describe svc auth-service -n explore
+  #kubectl delete deployment auth-service -n explore
+  #kubectl delete svc auth-service -n explore

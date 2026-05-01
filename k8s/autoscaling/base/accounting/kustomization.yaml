@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - hpa-invoice-service.yaml
+  - hpa-revenue-service.yaml
+  - hpa-cost-service.yaml  
+  - hpa-payment-service.yaml
+  - hpa-payroll-service.yaml
+  
+  - hpa-analytics-service.yaml
+  - hpa-kie-service.yaml
