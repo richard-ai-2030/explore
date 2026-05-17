@@ -54,26 +54,22 @@ cat <<MSG
   docker images
   docker ps  
   #kind delete cluster --name staging
-  docker rm -f  $(docker ps -aq) 2>/dev/null
-  docker rmi -f $(docker images -aq) 2>/dev/null
+  docker rm -f  $(docker ps -aq) 2>/dev/null;   docker rmi -f $(docker images -aq) 2>/dev/null
   docker system prune -a --volumes -f
 
-  # CHECK NETWORKING
-  docker network ls
+  # CHECK NETWORKING  
   for d in kafka redis postgres; do docker network disconnect kind $d; done
   for c in postgres redis kafka; do docker network connect kind $c; done
   docker network inspect kind
+  docker network ls
   #docker inspect postgres        # redis         # kafka
 
   # CHECK KUBERNETES
   kubectl get namespaces
-  #kubectl delete namespace explore
+  kubectl get ingress -n explore
   kubectl get nodes -o wide
   kubectl top pods -n explore
-  kubectl get events -n explore --sort-by=.lastTimestamp | tail -n 25     # logs at Kubernetes level
-  kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
-    kubectl get ingress -n explore
+  #kubectl delete namespace explore    
     kubectl set env deployment --all -n explore POSTGRES_HOST=172.19.0.5 KAFKA_BOOTSTRAP_SERVERS=172.19.0.7
-    kubectl set env deployment/auth-service -n explore REDIS_URL=redis://172.19.0.6:6379/0
-    kubectl exec -it auth-service-84b7cd99b4-x924k -n explore -- env | grep REDIS
+    kubectl set env deployment/auth-service -n explore REDIS_URL=redis://172.19.0.6:6379/0  
 MSG
