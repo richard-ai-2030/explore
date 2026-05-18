@@ -1,4 +1,4 @@
-# CHECK FOUNDATION SERVICES
+# DEPLOY FOUNDATION SERVICES
 kubectl apply -k k8s/cloud/overlays/local/shared
 kubectl wait -n explore --for=condition=available deployment --all --timeout=600s
 #kubectl delete -k k8s/cloud/overlays/local/shared
@@ -11,19 +11,13 @@ kubectl wait -n explore --for=condition=available deployment --all --timeout=600
     kubectl get pods -o wide -n $n;            # independent deployable unit where the actual application lives
     kubectl get endpoints -n $n;               # Endpoints are only populated when Pod is Running and Readiness probe passes
   done
-
-# AUTO TEST SMOKE-01  
-kubectl port-forward -n ingress-nginx "svc/ingress-nginx-controller" "8888:80"
-  curl http://127.0.0.1:8888/api/auth/health
-kubectl port-forward -n explore "svc/auth-service" "7000:7000"
-  curl http://127.0.0.1:7000/health
   
-# CHECK DOMAIN SERVICES
+# DEPLOY DOMAIN SERVICES
 kubectl apply -k k8s/cloud/overlays/local/marketing
 kubectl wait -n explore --for=condition=available deployment --all --timeout=600s
 #kubectl delete -k k8s/cloud/overlays/local/marketing
 
-# CHECK AUTOSCALING
+# DEPLOY AUTOSCALING
 kubectl apply -k k8s/autoscaling/overlays/local/shared
 kubectl apply -k k8s/autoscaling/overlays/local/marketing
 kubectl wait -n explore --for=condition=available deployment --all --timeout=600s
@@ -31,14 +25,9 @@ kubectl wait -n explore --for=condition=available deployment --all --timeout=600
   #kubectl delete hpa --all -n explore
   #kubectl scale deployment --all --replicas=1 -n explore
 
-# AUTO TEST SMOKE-02
-./automation/CI_workflow/smoke-test.sh
-./automation/CD_workflow/run-FRONTEND.sh
-  #http://127.0.0.1:808x          http://127.0.0.1:8025
-
-# UPDATE AUTH-SERVICE AND RE-DEPLOY
+# RE-DEPLOY AUTH-SERVICE to staging after code changes
   docker build -t auth-service:version3 ./services/BASE/auth-service
-  kind load docker-image auth-service:version3 --name staging  
+  kind load docker-image auth-service:version3 --name staging
   kubectl apply -f k8s/cloud/base/shared/auth-service.yaml
   kubectl rollout restart deployment auth-service -n explore
 

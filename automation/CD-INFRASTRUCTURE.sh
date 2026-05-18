@@ -70,6 +70,12 @@ cat <<MSG
   kubectl get ingress -n explore
   kubectl get nodes -o wide
   kubectl top pods -n explore
+
+  kubectl describe deployment auth-service -n explore
+  kubectl describe svc auth-service -n explore
+  #kubectl delete deployment auth-service -n explore
+  #kubectl delete svc auth-service -n explore
+
   #kind delete cluster --name staging
   #kubectl delete namespace explore    
     kubectl set env deployment --all -n explore POSTGRES_HOST=172.19.0.5 KAFKA_BOOTSTRAP_SERVERS=172.19.0.7

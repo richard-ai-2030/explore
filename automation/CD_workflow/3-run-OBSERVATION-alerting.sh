@@ -9,11 +9,6 @@ kubectl exec -it auth-service-75799cb866-25wlz -n explore -- /bin/bash
 kubectl logs -f deployment/auth-service -n explore
 kubectl logs -n explore $(kubectl get pods -n explore | grep auth-service | awk '{print $1}' | head -n 1)
 
-  #kubectl describe deployment auth-service -n explore
-  #kubectl describe svc auth-service -n explore
-  #kubectl delete deployment auth-service -n explore
-  #kubectl delete svc auth-service -n explore
-
 
 #-------------- OBSERVE REDIS --------------
 docker exec -it redis redis-cli MONITOR                         # execute command in an existing Docker container
