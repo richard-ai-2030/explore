@@ -50,6 +50,9 @@ NGINX API Gateway runs inside the Kubernetes cluster, as a Pod (Deployment, HPA)
 reorganize Kafka topics and consumer groups
 reorganize Redis key
 
+# play with Service Mesh : mTLS, rounting/retries/timeout, failover handling
+  REST + JSON | HTTP 1.1           VS   GRAPHQL + JSON
+  gRPC + Protobuf | HTTP 2.0
 
 ?? adding scaling per RPS instead of CPU, rate limiting ? at Nginx, at each domain service
 

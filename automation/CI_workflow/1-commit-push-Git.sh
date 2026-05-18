@@ -11,4 +11,4 @@ git add .
 git commit -m "$MESSAGE"
 git push origin master
 
-echo "Done - $MESSAGE"
+echo "Git push Done - $MESSAGE"

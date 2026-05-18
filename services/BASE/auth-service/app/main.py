@@ -68,7 +68,7 @@ import hmac
 import jwt
 
 JWT_SECRET = os.getenv('JWT_SECRET', 'v3-jwt-4f7c2a9e1b6d8f0c-secure-rotated-2026-04')
-JWT_ISSUER = 'agency-assist-explore'
+JWT_ISSUER = 'Richard-AI-explore'
 VERIFY_CACHE_TTL_SECONDS = int(os.getenv('VERIFY_CACHE_TTL_SECONDS', '300'))
 DEFAULT_ROLE = os.getenv('DEFAULT_ROLE', 'marketing').strip() or 'marketing'
 
