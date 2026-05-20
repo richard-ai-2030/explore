@@ -7,3 +7,4 @@ resources:
   - hpa-bff-talents.yaml
   - hpa-bff-production.yaml
   - hpa-notification-service.yaml
+  - hpa-analytics-service.yaml

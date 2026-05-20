@@ -15,7 +15,7 @@ from psycopg.rows import dict_row
 from .eventing import OutboxRelay, enqueue_outbox_event, init_outbox_table
 from .redis_cache import cache_key, close as close_redis, delete_prefix, enabled as redis_enabled, get_json, ping as redis_ping, set_json
 
-SERVICE_NAME = "attendance-service"
+SERVICE_NAME = "training-service"
 PORT = int(os.getenv('PORT', '7143'))
 POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
 POSTGRES_PORT = int(os.getenv('POSTGRES_PORT', '5432'))
@@ -237,7 +237,7 @@ def compute(payload: dict[str, Any]) -> dict[str, Any]:
         amount = float(payload.get('salary', amount or 0))
         state = 'active'
         insights = {'department': payload.get('department', 'general'), 'manager': payload.get('manager', 'unassigned')}
-    elif SERVICE_NAME == 'attendance-service':
+    elif SERVICE_NAME == 'training-service':
         hours = float(payload.get('hours', 8))
         late_minutes = int(payload.get('lateMinutes', 0))
         score = max(0, 100 - late_minutes)

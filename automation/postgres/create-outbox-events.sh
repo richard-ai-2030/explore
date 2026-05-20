@@ -24,7 +24,7 @@ PRODUCER_DATABASES=(
   cost_service
   recruitment_service
   employees_service
-  attendance_service
+  training_service
   motivation_service
   payroll_service
 )

@@ -10,7 +10,7 @@ export PGPASSWORD
 
 service_dbs=(
   analytics_service
-  attendance_service
+  training_service
   auth_service
   campaign_service
   cost_service

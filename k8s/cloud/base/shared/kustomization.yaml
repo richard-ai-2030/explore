@@ -9,3 +9,4 @@ resources:
   - bff-production.yaml
   - auth-service.yaml
   - notification-service.yaml
+  - analytics-service.yaml

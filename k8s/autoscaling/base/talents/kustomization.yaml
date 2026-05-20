@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - hpa-recruitment-service.yaml
   - hpa-employees-service.yaml
-  - hpa-attendance-service.yaml
+  - hpa-training-service.yaml
   - hpa-motivation-service.yaml

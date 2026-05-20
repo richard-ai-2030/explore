@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - recruitment-service.yaml
   - employees-service.yaml
-  - attendance-service.yaml
+  - training-service.yaml
   - motivation-service.yaml

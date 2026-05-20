@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: attendance-service
+  name: training-service
   namespace: explore
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: attendance-service
+      app: training-service
   template:
     metadata:
       labels:
-        app: attendance-service
+        app: training-service
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: /metrics
         prometheus.io/port: "7143"
     spec:
       containers:
-        - name: attendance-service
-          image: attendance-service:version3
+        - name: training-service
+          image: training-service:version3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7143
@@ -27,7 +27,7 @@ spec:
             - name: REDIS_URL
               value: "redis://172.19.0.6:6379/0"
             - name: REDIS_PREFIX
-              value: "attendance-service"
+              value: "training-service"
             - name: DEFAULT_CACHE_TTL_SECONDS
               value: "600"
             - name: PORT
@@ -41,7 +41,7 @@ spec:
             - name: POSTGRES_PASSWORD
               value: "postgres"
             - name: POSTGRES_DB
-              value: "attendance_service"
+              value: "training_service"
             - name: KAFKA_ENABLED
               value: "true"
             - name: KAFKA_BOOTSTRAP_SERVERS
@@ -52,11 +52,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: attendance-service
+  name: training-service
   namespace: explore
 spec:
   selector:
-    app: attendance-service
+    app: training-service
   ports:
     - name: http
       port: 7143

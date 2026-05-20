@@ -47,13 +47,13 @@ DOMAIN = "talents"
 SERVICE_URLS = {
     "recruitment": "http://recruitment-service:7141",
     "employees": "http://employees-service:7142",
-    "attendance": "http://attendance-service:7143",
+    "training": "http://training-service:7143",
     "motivation": "http://motivation-service:7144"
 }
 SUMMARY_PATHS = {
     "recruitment": "/candidates/summary",
     "employees": "/employees/summary",
-    "attendance": "/records/summary",
+    "training": "/records/summary",
     "motivation": "/pulses/summary"
 }
 ANALYTICS_URL = os.getenv('ANALYTICS_SERVICE_URL', 'http://analytics-service:7002')
@@ -139,14 +139,14 @@ async def talent_retention_loop(request: Request):
     user_email = request.headers.get('x-auth-user-email', 'ops@gmail.com')
     async with httpx.AsyncClient(timeout=8.0) as client:
         employee = (await client.post(SERVICE_URLS['employees'] + '/employees', json={'payload': body.get('employee', {'employeeName': 'Retention Candidate', 'department': 'Operations', 'level': 'L3', 'salary': 72000})})).json()
-        attendance = (await client.post(SERVICE_URLS['attendance'] + '/records', json={'payload': body.get('attendance', {'employeeId': employee.get('id'), 'hours': 7.5, 'lateMinutes': 4, 'workMode': 'hybrid'})})).json()
+        training = (await client.post(SERVICE_URLS['training'] + '/records', json={'payload': body.get('training', {'employeeId': employee.get('id'), 'hours': 7.5, 'lateMinutes': 4, 'workMode': 'hybrid'})})).json()
         pulse = (await client.post(SERVICE_URLS['motivation'] + '/pulses', json={'payload': body.get('pulse', {'employeeId': employee.get('id'), 'mood': 61, 'recognition': 58, 'workload': 78})})).json()
         recruitment = (await client.post(SERVICE_URLS['recruitment'] + '/candidates', json={'payload': body.get('benchCandidate', {'candidateName': 'Bench Successor', 'fit': 76, 'availability': 82, 'role': 'Ops backup'})})).json()
     await invalidate_domain_cache()
     await notify(user_email, 'Talent retention loop updated', f"Employee {employee.get('id')} pulse {pulse.get('state')}", 'talent')
     await invalidate_domain_cache()
     await emit_event('workflow_completed', {'workflow': RETENTION_PATH, 'records': 4})
-    return {'employee': employee, 'attendance': attendance, 'pulse': pulse, 'benchCandidate': recruitment}
+    return {'employee': employee, 'training': training, 'pulse': pulse, 'benchCandidate': recruitment}
 
 @app.post(WORKFLOW_PATH)
 async def workflow_handler(request: Request):
@@ -176,11 +176,11 @@ async def workflow_handler(request: Request):
         else:
             candidate = (await client.post(SERVICE_URLS['recruitment'] + '/candidates', json={'payload': body.get('candidate', {'candidateName': 'New Hire', 'fit': 84, 'availability': 78, 'role': 'Operations Specialist'})})).json()
             employee = (await client.post(SERVICE_URLS['employees'] + '/employees', json={'payload': body.get('employee', {'employeeName': candidate.get('name', 'New Hire'), 'department': 'Talent', 'level': 'L2', 'salary': 64000})})).json()
-            attendance = (await client.post(SERVICE_URLS['attendance'] + '/records', json={'payload': body.get('attendance', {'employeeId': employee.get('id'), 'hours': 8, 'lateMinutes': 0})})).json()
+            training = (await client.post(SERVICE_URLS['training'] + '/records', json={'payload': body.get('training', {'employeeId': employee.get('id'), 'hours': 8, 'lateMinutes': 0})})).json()
             pulse = (await client.post(SERVICE_URLS['motivation'] + '/pulses', json={'payload': body.get('pulse', {'employeeId': employee.get('id'), 'mood': 82, 'recognition': 76, 'workload': 42})})).json()
             await notify(user_email, 'Talent workflow completed', f"Hire-to-engage created employee {employee.get('id')}", 'talent')
             payroll = {'service': 'payroll-service', 'status': 'not-linked-in-talents-bff', 'recommendedDomain': 'production'}
-            result = {'candidate': candidate, 'employee': employee, 'attendance': attendance, 'pulse': pulse, 'payrollHint': payroll}
+            result = {'candidate': candidate, 'employee': employee, 'training': training, 'pulse': pulse, 'payrollHint': payroll}
     await emit_event('workflow_completed', {'workflow': WORKFLOW_PATH})
     return result
 

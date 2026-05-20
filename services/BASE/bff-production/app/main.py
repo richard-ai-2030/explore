@@ -205,10 +205,10 @@ async def workflow_handler(request: Request):
         else:
             candidate = (await client.post(SERVICE_URLS['recruitment'] + '/candidates', json={'payload': body.get('candidate', {'candidateName': 'New Hire', 'fit': 84, 'availability': 78, 'role': 'Operations Specialist'})})).json()
             employee = (await client.post(SERVICE_URLS['employees'] + '/employees', json={'payload': body.get('employee', {'employeeName': candidate.get('name', 'New Hire'), 'department': 'Talent', 'level': 'L2', 'salary': 64000})})).json()
-            attendance = (await client.post(SERVICE_URLS['attendance'] + '/records', json={'payload': body.get('attendance', {'employeeId': employee.get('id'), 'hours': 8, 'lateMinutes': 0})})).json()
+            training = (await client.post(SERVICE_URLS['training'] + '/records', json={'payload': body.get('training', {'employeeId': employee.get('id'), 'hours': 8, 'lateMinutes': 0})})).json()
             pulse = (await client.post(SERVICE_URLS['motivation'] + '/pulses', json={'payload': body.get('pulse', {'employeeId': employee.get('id'), 'mood': 82, 'recognition': 76, 'workload': 42})})).json()
             await notify(user_email, 'Talent workflow completed', f"Hire-to-engage created employee {employee.get('id')}", 'talent')
-            result = {'candidate': candidate, 'employee': employee, 'attendance': attendance, 'pulse': pulse}
+            result = {'candidate': candidate, 'employee': employee, 'training': training, 'pulse': pulse}
     await invalidate_domain_cache()
     await emit_event('workflow_completed', {'workflow': WORKFLOW_PATH})
     return result

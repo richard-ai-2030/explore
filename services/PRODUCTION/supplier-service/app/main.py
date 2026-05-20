@@ -237,7 +237,7 @@ def compute(payload: dict[str, Any]) -> dict[str, Any]:
         amount = float(payload.get('salary', amount or 0))
         state = 'active'
         insights = {'department': payload.get('department', 'general'), 'manager': payload.get('manager', 'unassigned')}
-    elif SERVICE_NAME == 'attendance-service':
+    elif SERVICE_NAME == 'training-service':
         hours = float(payload.get('hours', 8))
         late_minutes = int(payload.get('lateMinutes', 0))
         score = max(0, 100 - late_minutes)
