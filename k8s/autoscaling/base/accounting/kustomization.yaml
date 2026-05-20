@@ -8,4 +8,3 @@ resources:
   - hpa-payroll-service.yaml
   
   - hpa-analytics-service.yaml
-  - hpa-kie-service.yaml

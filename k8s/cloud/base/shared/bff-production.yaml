@@ -30,8 +30,6 @@ spec:
               value: "http://analytics-service:7002"
             - name: NOTIFICATION_SERVICE_URL
               value: "http://notification-service:7001"
-            - name: KIE_SERVICE_URL
-              value: "http://kie-service:7003"
             - name: REDIS_URL
               value: "redis://172.19.0.6:6379/0"
             - name: REDIS_PREFIX

@@ -36,8 +36,6 @@ spec:
               value: "http://analytics-service:7002"
             - name: NOTIFICATION_SERVICE_URL
               value: "http://notification-service:7001"
-            - name: KIE_SERVICE_URL
-              value: "http://kie-service:7003"
 ---
 apiVersion: v1
 kind: Service

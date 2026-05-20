@@ -58,7 +58,6 @@ SUMMARY_PATHS = {
 }
 ANALYTICS_URL = os.getenv('ANALYTICS_SERVICE_URL', 'http://analytics-service:7002')
 NOTIFICATION_URL = os.getenv('NOTIFICATION_SERVICE_URL', 'http://notification-service:7001')
-KIE_URL = os.getenv('KIE_SERVICE_URL', 'http://kie-service:7003')
 WORKFLOW_PATH = "/workflow/hire-to-engage"
 RETENTION_PATH = "/workflow/talent-retention-loop"
 
@@ -132,14 +131,6 @@ async def dashboard(request: Request):
     await set_json(dashboard_key, payload)
     await emit_event('dashboard_viewed', {'cards': len(cards), 'cache': 'miss'})
     return {**payload, '_cache': 'miss'}
-
-@app.post('/extract-insight')
-async def extract_insight(request: Request):
-    await require_identity(request)
-    body = await request.json()
-    async with httpx.AsyncClient(timeout=5.0) as client:
-        response = await client.post(f"{KIE_URL}/extract", json={'text': body.get('text', '')})
-    return response.json()
 
 @app.post(RETENTION_PATH)
 async def talent_retention_loop(request: Request):
