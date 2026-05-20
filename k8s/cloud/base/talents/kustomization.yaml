@@ -5,3 +5,4 @@ resources:
   - employees-service.yaml
   - training-service.yaml
   - motivation-service.yaml
+  - analytics-service.yaml

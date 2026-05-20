@@ -5,3 +5,4 @@ resources:
   - hpa-employees-service.yaml
   - hpa-training-service.yaml
   - hpa-motivation-service.yaml
+  - hpa-analytics-service.yaml

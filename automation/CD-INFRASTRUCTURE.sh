@@ -19,13 +19,13 @@ step "infrastructure - scaffold Postgres"
 
 
 step "Build FOUNDATION SERVICES to images"
-./automation/CI_workflow/build-domain-services.sh BASE         # MARKETING, PRODUCTION, TALENTS, ACCOUNTING
+./automation/CI_workflow/2-build-domain-services.sh BASE         # MARKETING, PRODUCTION, TALENTS, ACCOUNTING
 
 step "KUBERNETES - Kind nodes"
 kind create cluster --name staging --config automation/kubernetes/infra-nodes.yaml
 
 step "KUBERNETES - Load FOUNDATION SERVICES to K8S"
-./automation/CI_workflow/load-services-to-kind.sh BASE         # MARKETING, PRODUCTION, TALENTS, ACCOUNTING
+./automation/CI_workflow/3-staging-services-Kubernetes.sh BASE         # MARKETING, PRODUCTION, TALENTS, ACCOUNTING
 
 
 step "KUBERNETES - Nginx API Gateway ~ Ingress controller Pod"
@@ -48,11 +48,11 @@ kubectl rollout status deployment/metrics-server -n kube-system --timeout=600s
 
 step "NETWORKING - Connect subnets"
 docker network ls
-for d in kafka redis postgres; do docker network disconnect kind $d; done
+for d in clickhouse kafka redis postgres; do docker network disconnect kind $d; done
 for node in staging-worker2 staging-worker staging-control-plane; do docker stop $node; done
 
 for node in staging-worker2 staging-worker staging-control-plane; do docker start $node; done
-for c in postgres redis kafka; do docker network connect kind $c; done
+for c in postgres redis kafka clickhouse; do docker network connect kind $c; done
 docker network inspect kind
 
 echo
@@ -60,10 +60,11 @@ cat <<MSG
   tar -czf ../version3.tar.gz --exclude=.git --exclude=.terraform --exclude=.next --exclude=node_modules --exclude=*.pyc --exclude=__pycache__ .
 
   # CHECK INFRASTRUCTURE
-  docker images;    docker ps    
-  docker rm -f  $(docker ps -aq) 2>/dev/null;   docker rmi -f $(docker images -aq) 2>/dev/null
+  docker images;    docker ps;    
+  docker rm -f  $(docker ps -aq) 2>/dev/null;   
+  docker rmi -f $(docker images -aq) 2>/dev/null;
   docker system prune -a --volumes -f
-  docker inspect postgres        # redis         # kafka
+  docker inspect postgres      # redis       # kafka
   
   # CHECK KUBERNETES
   kubectl get namespaces
@@ -79,5 +80,6 @@ cat <<MSG
   #kind delete cluster --name staging
   #kubectl delete namespace explore    
     kubectl set env deployment --all -n explore POSTGRES_HOST=172.19.0.5 KAFKA_BOOTSTRAP_SERVERS=172.19.0.7
+    kubectl set env deployment/analytics-service -n explore CLICKHOUSE_HOST=172.19.0.8 CLICKHOUSE_PORT=8123
     kubectl set env deployment/auth-service -n explore REDIS_URL=redis://172.19.0.6:6379/0  
 MSG

@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-kafka-clickhouse-events
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  kafka-clickhouse-events.json: |
+    {
+      "title": "Kafka Events (ClickHouse)",
+      "timezone": "utc",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "tags": ["analytics", "kafka", "clickhouse"],
+      "templating": {
+        "list": [
+          {
+            "name": "domain",
+            "type": "query",
+            "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-events" },
+            "query": "SELECT DISTINCT domain FROM explore.events WHERE occurred_at >= now() - INTERVAL 7 DAY ORDER BY domain",
+            "refresh": 2,
+            "includeAll": true,
+            "multi": true,
+            "current": { "text": "All", "value": "$__all" }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Events per minute by domain",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-events" },
+          "targets": [
+            {
+              "queryType": "sql",
+              "rawSql": "SELECT toStartOfMinute(occurred_at) AS time, domain, count() AS events FROM explore.events WHERE occurred_at >= now() - INTERVAL 6 HOUR AND ($domain = '$__all' OR domain IN (${domain:sqlstring})) GROUP BY time, domain ORDER BY time",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "type": "barchart",
+          "title": "Top event types (24h)",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-events" },
+          "targets": [
+            {
+              "queryType": "sql",
+              "rawSql": "SELECT event_type, count() AS events FROM explore.events WHERE occurred_at >= now() - INTERVAL 24 HOUR GROUP BY event_type ORDER BY events DESC LIMIT 12",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Recent events",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-events" },
+          "targets": [
+            {
+              "queryType": "sql",
+              "rawSql": "SELECT occurred_at, domain, event_type, producer, aggregate_id, actor FROM explore.events WHERE occurred_at >= now() - INTERVAL 24 HOUR ORDER BY occurred_at DESC LIMIT 50",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Events ingested (24h)",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 18 },
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-events" },
+          "targets": [
+            {
+              "queryType": "sql",
+              "rawSql": "SELECT count() AS events FROM explore.events WHERE occurred_at >= now() - INTERVAL 24 HOUR",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Distinct producers (24h)",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 18 },
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-events" },
+          "targets": [
+            {
+              "queryType": "sql",
+              "rawSql": "SELECT uniqExact(producer) AS producers FROM explore.events WHERE occurred_at >= now() - INTERVAL 24 HOUR",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }

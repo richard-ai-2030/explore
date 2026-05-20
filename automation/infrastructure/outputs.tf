@@ -5,6 +5,7 @@ output "infrastructure_endpoints" {
     elasticsearch = "localhost:9200"
     kafka = "localhost:9092"
     redis = "localhost:6379"
+    clickhouse = "localhost:8123"
     mailhog = "localhost:8025"
   }
 }

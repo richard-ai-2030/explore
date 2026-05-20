@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# CD PIPELINE AUTOMATION
-
 # deploy APPLICATION SERVICES
 ./automation/CD_workflow/2-deploy-APP-SERVICES.sh
 
 # run OBSERVATIONS
-./automation/CD_workflow/3-run-OBSERVATION-alerting.sh
+./automation/CD_workflow/3-run-Prometheus-Grafana.sh
 
 # run FRONTENDS & API Gateway
 ./automation/CD_workflow/4-run-FRONTEND-API-gateway.sh

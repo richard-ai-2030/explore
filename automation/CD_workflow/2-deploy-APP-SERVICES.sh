@@ -33,7 +33,6 @@ kubectl wait -n explore --for=condition=available deployment --all --timeout=600
 
 echo
 cat <<MSG  
-NGINX API Gateway runs inside the Kubernetes cluster, as a Pod (Deployment, HPA) at namespace ingress-nginx
 
 ?? still no records at notifications and events table
 reorganize Kafka topics and consumer groups
@@ -45,8 +44,6 @@ reorganize Redis key
 
 ?? adding scaling per RPS instead of CPU, rate limiting ? at Nginx, at each domain service
 
-?? update Analytics-service with Kafka events -> ClickHouse -> Grafana
-          Observations-service                   Prometheus -> Grafana
 
 ?? enforce RBAC using `X-Auth-*` headers for Downstream services (a JWT has 3 parts: header.payload.signature)
 

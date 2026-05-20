@@ -13,6 +13,8 @@ from pydantic import BaseModel, Field
 from prometheus_client import CONTENT_TYPE_LATEST, Counter as PromCounter, Histogram, generate_latest
 from psycopg.rows import dict_row
 
+from .clickhouse_store import close as close_clickhouse, init_schema as init_clickhouse, insert_http_event, insert_kafka_event, ping as clickhouse_ping, query_recent_events
+from .clickhouse_store import enabled as clickhouse_enabled
 from .eventing import KafkaEventConsumer
 from .redis_cache import cache_key, close as close_redis, delete_prefix, enabled as redis_enabled, get_json, ping as redis_ping, set_json
 
@@ -480,6 +482,7 @@ def project_event(message: dict[str, Any]) -> None:
 
 
 def handle_kafka_event(message: dict[str, Any]) -> None:
+    insert_kafka_event(message)
     store_event(
         source=message.get('producer', 'unknown'),
         event=message.get('eventType', 'unknown'),
@@ -494,20 +497,20 @@ def handle_kafka_event(message: dict[str, Any]) -> None:
 async def startup_event():
     init_db()
     init_search()
+    init_clickhouse()
     app.state.kafka_consumer = KafkaEventConsumer(SERVICE_NAME, handle_kafka_event)
     app.state.kafka_consumer.start()
 
 
-@app.on_event('shutdown')
-def shutdown_event():
-    consumer = getattr(app.state, 'kafka_consumer', None)
-    if consumer:
-        consumer.stop()
-
-
 @app.get('/health')
 def health():
-    return {'service': SERVICE_NAME, 'status': 'ok', 'port': PORT, 'elasticsearch': bool(get_es())}
+    return {
+        'service': SERVICE_NAME,
+        'status': 'ok',
+        'port': PORT,
+        'clickhouse': {'enabled': clickhouse_enabled(), 'healthy': clickhouse_ping()},
+        'elasticsearch': bool(get_es()),
+    }
 
 
 @app.get('/metrics')
@@ -517,12 +520,26 @@ def metrics():
 
 @app.post('/events')
 async def emit_event(body: EventIn):
-    event_id = store_event(body.source, body.event, body.payload)
-    project_event({'eventId': event_id, 'producer': body.source, 'eventType': body.event, 'payload': body.payload, 'occurredAt': now_iso()})
+    created_at = now_iso()
+    event_id = store_event(body.source, body.event, body.payload, created_at=created_at)
+    insert_http_event(event_id, infer_domain(body.event), body.source, body.event, body.payload, created_at)
+    project_event({'eventId': event_id, 'producer': body.source, 'eventType': body.event, 'payload': body.payload, 'occurredAt': created_at})
     return {'id': event_id, 'stored': True}
 
 
+def _analytics_backends() -> dict[str, bool]:
+    return {
+        'postgres': True,
+        'clickhouse': clickhouse_ping(),
+        'elasticsearch': bool(get_es()),
+    }
+
+
 def _query_domain_events(domain: str, size: int = 20) -> list[dict[str, Any]]:
+    if clickhouse_ping():
+        rows = query_recent_events(domain, size)
+        if rows:
+            return rows
     es = get_es()
     if es:
         try:
@@ -599,7 +616,7 @@ async def dashboard(domain: str):
                 'hotLeads': sum(1 for row in lead_rows if row.get('hot_state') == 'sales-ready' or row.get('state') == 'hot'),
             },
             'recent': events[:10],
-            'backends': {'postgres': True, 'elasticsearch': bool(get_es())},
+            'backends': _analytics_backends(),
         }
     rows = _query_domain_projections(domain)
     state_counts = Counter(row.get('state', 'unknown') for row in rows)
@@ -618,7 +635,7 @@ async def dashboard(domain: str):
             'averageScore': avg_score,
         },
         'recent': events[:10],
-        'backends': {'postgres': True, 'elasticsearch': bool(get_es())},
+        'backends': _analytics_backends(),
     }
     if domain == 'production':
         summary['operations'] = {
@@ -682,4 +699,8 @@ async def talent_report():
 
 @app.on_event('shutdown')
 async def shutdown_event():
+    consumer = getattr(app.state, 'kafka_consumer', None)
+    if consumer:
+        consumer.stop()
+    close_clickhouse()
     await close_redis()

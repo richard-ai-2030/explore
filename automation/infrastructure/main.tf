@@ -17,6 +17,15 @@ locals {
       env = ["discovery.type=single-node", "xpack.security.enabled=false", "ES_JAVA_OPTS=-Xms512m -Xmx512m"]
       ports = [{ internal = 9200, external = 9200 }]
       volumes = []
+    }
+    clickhouse = {
+      image = "clickhouse/clickhouse-server:24.8"
+      env = []
+      ports = [
+        { internal = 8123, external = 8123 },
+        { internal = 9000, external = 9000 }
+      ]
+      volumes = [{ container_path = "/var/lib/clickhouse", name = docker_volume.clickhouse_data.name }]
     }*/
     redis = {
       image = "redis:7-alpine"
@@ -53,7 +62,7 @@ locals {
       env = []
       ports = [{ internal = 1025, external = 1025 }, { internal = 8025, external = 8025 }]
       volumes = []
-    }
+    }    
   }
 }
 
@@ -63,6 +72,7 @@ resource "docker_network" "infra_net" {
 
 resource "docker_volume" "postgres_data" { name = "explore_postgres_data" }
 resource "docker_volume" "mongodb_data" { name = "explore_mongodb_data" }
+resource "docker_volume" "clickhouse_data" { name = "explore_clickhouse_data" }
 
 resource "docker_image" "images" {
   for_each = local.services

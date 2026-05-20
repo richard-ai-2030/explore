@@ -3,12 +3,27 @@ grafana:
   service:
     type: ClusterIP
   defaultDashboardsTimezone: utc
+  plugins:
+    - grafana-clickhouse-datasource
   sidecar:
     dashboards:
       enabled: true
       searchNamespace: ALL
     datasources:
       enabled: true
+  additionalDataSources:
+    - name: ClickHouse-Events
+      uid: clickhouse-events
+      type: grafana-clickhouse-datasource
+      access: proxy
+      url: http://172.19.0.8:8123
+      isDefault: false
+      jsonData:
+        host: 172.19.0.8
+        port: 8123
+        protocol: http
+        defaultDatabase: explore
+        tlsSkipVerify: true
 
 prometheus:
   prometheusSpec:

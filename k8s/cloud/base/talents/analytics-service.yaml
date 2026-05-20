@@ -40,13 +40,23 @@ spec:
         - name: KAFKA_ENABLED
           value: 'true'
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: host.docker.internal:9092
+          value: 172.19.0.7:9092
         - name: KAFKA_EVENTS_TOPIC
           value: explore.events
         - name: KAFKA_CONSUMER_GROUP
           value: analytics-service-group
+        - name: CLICKHOUSE_ENABLED
+          value: 'true'
+        - name: CLICKHOUSE_HOST
+          value: 172.19.0.8
+        - name: CLICKHOUSE_PORT
+          value: '8123'
+        - name: CLICKHOUSE_DATABASE
+          value: explore
+        - name: CLICKHOUSE_EVENTS_TABLE
+          value: events
         - name: ELASTICSEARCH_URL
-          value: http://172.19.0.1:9200
+          value: ''
         - name: ELASTICSEARCH_EVENTS_INDEX
           value: explore-events-v3
         - name: ELASTICSEARCH_PROJECTION_INDEX

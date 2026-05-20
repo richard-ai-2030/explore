@@ -7,10 +7,10 @@ set -euo pipefail
 ./automation/CI_workflow/1-commit-push-Git.sh "improve codes"
 
 # auto build images for each Git push 
-./automation/CI_workflow/2-build-domain-services.sh
+./automation/CI_workflow/2-build-domain-services.sh MARKETING
 
 # auto push to Containers Registry for each image built
-./automation/CI_workflow/3-staging-services-Kubernetes.sh
+./automation/CI_workflow/3-staging-services-Kubernetes.sh MARKETING
 
 # AUTO TEST with a Docker container node
 # Unit Test

@@ -12,13 +12,15 @@ kubectl apply -f monitoring/servicemonitors.yaml
 kubectl apply -f monitoring/probes.yaml
 kubectl apply -f monitoring/alerts.yaml
 kubectl apply -f monitoring/grafana-dashboard-configmap.yaml
+kubectl apply -f monitoring/grafana-events-dashboard-configmap.yaml
 
 nohup kubectl -n monitoring port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 >/tmp/prometheus-port-forward.log 2>&1 &
     #http://127.0.0.1:9090
 
 nohup kubectl -n monitoring port-forward svc/monitoring-grafana 9091:80 >/tmp/grafana-port-forward.log 2>&1 &
     #http://127.0.0.1:9091       admin / admin123
-    #Dashboards → menu "Core Services-Latency and RPS"
+    #Dashboards → "Marketing Services - Latency and RPS" (Prometheus)
+    #Dashboards → "Kafka Events (ClickHouse)" (event analytics)
 
 nohup kubectl port-forward svc/bff-marketing -n explore 9092:7010 >/tmp/bff-marketing-port-forward.log 2>&1 &
     #http://127.0.0.1:9092/metrics

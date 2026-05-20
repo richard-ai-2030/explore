@@ -33,6 +33,10 @@ docker exec -it kafka     kafka-console-producer --bootstrap-server kafka:29092 
 kubectl run kafka --rm -it --restart=Never --image=confluentinc/cp-kafka:latest bash
   kafka-console-consumer --bootstrap-server 172.19.0.7:9092 --topic explore.events
 
+#-------------- OBSERVE CLICKHOUSE --------------
+curl -s "http://172.19.0.8:8123/?query=SELECT%20count()%20FROM%20explore.events"
+curl -s "http://172.19.0.8:8123/?query=SELECT%20domain,event_type,count()%20FROM%20explore.events%20GROUP%20BY%20domain,event_type%20ORDER%20BY%20count()%20DESC%20LIMIT%2010"
+
 kubectl run kafkaproducer --rm -it --restart=Never --image=confluentinc/cp-kafka:latest --command --   \
   kafka-console-producer --bootstrap-server 172.19.0.7:9092 --topic explore.events
 
