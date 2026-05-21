@@ -6,19 +6,7 @@ IMAGE_REGISTRY="ghcr.io/richard-ai-2030"
 IMAGE_TAG="version3"
 
 DOMAIN="${1:-}"
-
-if [ -z "$DOMAIN" ]; then
-  echo "❌ Usage: $0 <DOMAIN>"
-  echo "Example: $0 MARKETING"
-  exit 1
-fi
-
 TARGET_DIR="services/${DOMAIN}"
-
-if [ ! -d "$TARGET_DIR" ]; then
-  echo "❌ Directory not found: $TARGET_DIR"
-  exit 1
-fi
 
 build_and_push() {
   local name="$1"
@@ -33,8 +21,6 @@ build_and_push() {
     docker push "${IMAGE_REGISTRY}/${name}:${IMAGE_TAG}"
   fi
 }
-
-echo "Scanning ${TARGET_DIR}/ ..."
 
 for dir in "${TARGET_DIR}"/*; do
   [ -d "$dir" ] || continue

@@ -21,15 +21,9 @@ kubectl wait -n explore --for=condition=available deployment --all --timeout=600
 kubectl apply -k k8s/autoscaling/overlays/local/shared
 kubectl apply -k k8s/autoscaling/overlays/local/marketing
 kubectl wait -n explore --for=condition=available deployment --all --timeout=600s
-#kubectl delete -k k8s/autoscaling/overlays/local/shared  
+  #kubectl delete -k k8s/autoscaling/overlays/local/shared  
   #kubectl delete hpa --all -n explore
   #kubectl scale deployment --all --replicas=1 -n explore
-
-# RE-DEPLOY AUTH-SERVICE to staging after code changes
-  docker build -t auth-service:version3 ./services/BASE/auth-service
-  kind load docker-image auth-service:version3 --name staging
-  kubectl apply -f k8s/cloud/base/shared/auth-service.yaml
-  kubectl rollout restart deployment auth-service -n explore
 
 echo
 cat <<MSG  
