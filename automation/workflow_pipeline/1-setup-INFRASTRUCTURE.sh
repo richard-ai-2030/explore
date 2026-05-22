@@ -18,18 +18,20 @@ step "infrastructure - scaffold Postgres"
 ./automation/postgres/create-outbox-events.sh
 
 
-step "Build FOUNDATION SERVICES to images"
-./automation/CI_workflow/2-build-domain-services.sh BASE         # MARKETING, PRODUCTION, TALENTS, ACCOUNTING
+step "Build foundational SERVICES to images"
+./automation/agents/build-domain-services.sh BASE
+./automation/agents/build-domain-services.sh MARKETING
 
-step "KUBERNETES - deploy Nodes cluster autoscaling"
-kind create cluster --name staging --config automation/kubernetes/infra-nodes.yaml
+step "KUBERNETES - create Cluster"
+kind create cluster --name staging --config k8s/cluster/infra-nodes.yaml
 
-step "KUBERNETES - deploy FOUNDATION SERVICES to K8S"
-./automation/CI_workflow/3-staging-services-Kubernetes.sh BASE         # MARKETING, PRODUCTION, TALENTS, ACCOUNTING
+step "KUBERNETES - load foundational IMAGES to Cluster"
+./automation/agents/load-images-k8s.sh BASE
+./automation/agents/load-images-k8s.sh MARKETING
 
 
 step "KUBERNETES - Nginx API Gateway ~ Ingress controller Pod"
-kubectl apply -f automation/kubernetes/infra-ingress-nginx.yaml
+kubectl apply -f k8s/cluster/infra-ingress-nginx.yaml
 kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=600s
 
 step "KUBERNETES - Service Mesh"
@@ -38,11 +40,11 @@ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/re
 linkerd install --crds | kubectl apply -f -
 linkerd install | kubectl apply -f -
 linkerd check
-kubectl apply -f automation/kubernetes/infra-linkerd.yaml
+kubectl apply -f k8s/cluster/infra-linkerd.yaml
 kubectl wait -n linkerd --for=condition=available deployment --all --timeout=600s
 
 step "KUBERNETES - Metrics Server"
-kubectl apply -f automation/kubernetes/infra-metrics-server.yaml
+kubectl apply -f k8s/cluster/infra-metrics-server.yaml
 kubectl patch deployment metrics-server -n kube-system --type=json -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP"}]' || true
 kubectl rollout status deployment/metrics-server -n kube-system --timeout=600s
 
@@ -52,14 +54,16 @@ cat <<MSG
   tar -czf ../version3.tar.gz --exclude=.git --exclude=.terraform --exclude=.next --exclude=node_modules --exclude=*.pyc --exclude=__pycache__ .
 
   # CHECK INFRASTRUCTURE
-  docker images;    docker ps;    
+  docker images;    docker ps;
   docker inspect postgres      # redis       # kafka
   #docker rm -f  $(docker ps -aq) 2>/dev/null;   docker rmi -f $(docker images -aq) 2>/dev/null;  docker system prune -a --volumes -f;
   #kind delete cluster --name staging;           kubectl delete namespace explore;
     
-  # CHECK KUBERNETES
+  # CHECK KUBERNETES CLUSTER
   kubectl get namespaces
   kubectl get ingress -n explore
   kubectl get nodes -o wide
   kubectl top pods -n explore
+  kubectl get events -n explore --sort-by=.lastTimestamp | tail -n 25
+  kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
 MSG

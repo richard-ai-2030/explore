@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#1 [STAGING] developers commit code changes
-./agents/commit-push-Git.sh "push code changes"
+#1 commit code changes
+./automation/agents/commit-push-Git.sh "push code changes"
 
-#2 [STAGING] auto build the updated image for each Git push (push to CR)
-docker build -t auth-service:version3 ./services/BASE/auth-service
-# or customizing to use ./agents/build-domain-services.sh BASE auth
-# or rebuild all ./agents/build-domain-services.sh BASE
+#2 re-build updated images & push to CR
+./automation/agents/build-domain-services.sh BASE
+# TRIGGER BULDING ONLY CHANGED SERVICES FROM GITHUB PUSH
+#docker build -t auth-service:version3 ./services/BASE/auth-service
 
-#3 [STAGING] AUTO DEPLOY THE UPDATED IMAGE
-kind load docker-image auth-service:version3 --name staging
+#3 DEPLOY UPDATED IMAGES to K8S
+./automation/agents/deploy-images-Kubernetes.sh BASE
+# or customizing to use ./automation/agents/deploy-images-Kubernetes.sh BASE auth
+#kind load docker-image auth-service:version3 --name staging
 #kubectl apply -f k8s/cloud/base/shared/auth-service.yaml
-kubectl rollout restart deployment auth-service -n explore
+#kubectl rollout restart deployment auth-service -n explore
 
-# or customizing to use ./agents/deploy-images-Kubernetes.sh BASE auth
-# or redeploy all ./agents/deploy-images-Kubernetes.sh BASE
-
-
-#4 [STAGING] auto run Unit Test (Docker container node)
+#4 RUN UNIT TEST (Docker node)
 kubectl port-forward -n ingress-nginx "svc/ingress-nginx-controller" "8888:80"
   curl http://127.0.0.1:8888/api/auth/health
 kubectl port-forward -n explore "svc/auth-service" "7000:7000"
   curl http://127.0.0.1:7000/health
+kubectl port-forward -n explore "svc/bff-marketing" "7010:7010"
+  curl http://127.0.0.1:7010/health
 
-#5 [STAGING] auto run Integration Test
-./agents/test-smoke-staging.sh
+#5 RUN INTEGRATION TEST
+./automation/agents/test-smoke-staging.sh
 
-#6 [STAGING] auto redeploy Frontend & run UAT Testflow
-./agents/run-FRONTEND-API-gateway.sh
-  # open Browser, go to http://127.0.0.1:808x
-  # click button Register
-  # click button Create Campaign
-  # check Email Box http://127.0.0.1:8025
+#6 RUN UAT TESTFLOWS
+./automation/agents/run-FRONTEND-API-gateway.sh
+  # curl http://127.0.0.1:8080
+  # click_button "Register"
+  # click_button "Create Campaign"
+  # check_Email_Box http://127.0.0.1:8025

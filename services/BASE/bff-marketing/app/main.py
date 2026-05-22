@@ -218,6 +218,18 @@ async def launch_campaign(campaign_id: str, request: Request):
     return campaign
 
 
+from strawberry.fastapi import GraphQLRouter
+from .graphql_schema import schema
+
+
+async def get_graphql_context(request: Request, response=None):
+    return {"request": request}
+
+
+graphql_app = GraphQLRouter(schema, context_getter=get_graphql_context)
+app.include_router(graphql_app, prefix="/graphql")
+
+
 @app.api_route('/{service_key}', methods=['GET', 'POST'])
 @app.api_route('/{service_key}/{path:path}', methods=['GET', 'POST'])
 async def proxy(service_key: str, path: str, request: Request = None):
@@ -233,6 +245,7 @@ async def proxy(service_key: str, path: str, request: Request = None):
         await invalidate_domain_cache()
     await emit_event('proxy_call', {'service': service_key, 'path': path, 'method': request.method})
     return await proxy_request(service_key, path, request, body)
+
 
 @app.on_event('shutdown')
 async def shutdown_event():

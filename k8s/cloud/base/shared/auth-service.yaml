@@ -30,7 +30,7 @@ spec:
         - name: PORT
           value: '7000'
         - name: JWT_SECRET
-          value: v3-jwt-4f7c2a9e1b6d8f0c-secure-rotated-2026-04        
+          value: jwt-4f7c2a9e1b6d8f0c-secure-rotated-2026-04        
         - name: POSTGRES_HOST
           value: 172.19.0.5
         - name: POSTGRES_PORT

@@ -1,20 +1,21 @@
 #-------------- OBSERVE KUBERNETES --------------
-kubectl get events -n explore --sort-by=.lastTimestamp | tail -n 25     # logs at Kubernetes level
-kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
-  kubectl exec -it auth-service-84b7cd99b4-x924k -n explore -- env | grep REDIS
-
+kubectl exec -it auth-service-84b7cd99b4-x924k -n explore -- env | grep REDIS
 kubectl exec -it auth-service-75799cb866-25wlz -n explore -- /bin/bash
   apt update && apt install curl iputils-ping -y
 
-kubectl logs -f deployment/auth-service -n explore
+kubectl logs -f deployment/leads-acquisition-service -n explore
 kubectl logs -n explore $(kubectl get pods -n explore | grep auth-service | awk '{print $1}' | head -n 1)
 
   kubectl describe deployment auth-service -n explore
   kubectl describe svc auth-service -n explore
+  kubectl describe pod auth-service-65bc895d5b-8d5wf -n explore
+  kubectl get pod auth-service-65bc895d5b-8d5wf  -n explore -o jsonpath='{.spec.containers[*].name}'
   #kubectl delete deployment auth-service -n explore
   #kubectl delete svc auth-service -n explore
   #kubectl set env deployment --all -n explore POSTGRES_HOST=172.19.0.5 KAFKA_BOOTSTRAP_SERVERS=172.19.0.7
   #kubectl set env deployment/auth-service -n explore REDIS_URL=redis://172.19.0.6:6379/0  
+  #kubectl delete hpa --all -n explore
+  #kubectl scale deployment --all --replicas=1 -n explore
 
 
 #-------------- OBSERVE REDIS --------------
