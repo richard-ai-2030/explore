@@ -232,7 +232,7 @@ app.include_router(graphql_app, prefix="/graphql")
 
 @app.api_route('/{service_key}', methods=['GET', 'POST'])
 @app.api_route('/{service_key}/{path:path}', methods=['GET', 'POST'])
-async def proxy(service_key: str, path: str, request: Request = None):
+async def proxy(service_key: str, path: str = "", request: Request = None):
     await require_identity(request)
     body = None
     if request.method != 'GET':

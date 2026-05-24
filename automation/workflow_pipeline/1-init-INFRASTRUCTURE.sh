@@ -42,6 +42,7 @@ linkerd install | kubectl apply -f -
 linkerd check
 kubectl apply -f k8s/cluster/infra-linkerd.yaml
 kubectl wait -n linkerd --for=condition=available deployment --all --timeout=600s
+kubectl annotate namespace explore linkerd.io/inject=enabled
 
 step "KUBERNETES - Metrics Server"
 kubectl apply -f k8s/cluster/infra-metrics-server.yaml
@@ -66,4 +67,11 @@ cat <<MSG
   kubectl top pods -n explore
   kubectl get events -n explore --sort-by=.lastTimestamp | tail -n 25
   kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
+
+  # CHECK SERVICE MESH
+  kubectl get namespace explore -o yaml
+  kubectl rollout restart deployment -n explore
+  kubectl get pods -n explore -w
+  kubectl get pod auth-service-5968bd99dd-4qxsf -n explore -o jsonpath='{.spec.containers[*].name}'
+  linkerd identity -n explore auth-service-5968bd99dd-4qxsf
 MSG

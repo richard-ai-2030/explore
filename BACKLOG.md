@@ -1,12 +1,9 @@
-how to feel Service Mesh is working
-
 ?? still no records at notifications and events table
 reorganize Kafka topics and consumer groups
 reorganize Redis key
 
 ??e-commerce, payment, AI model integration
 
-?? adding scaling per RPS instead of CPU, rate limiting ? at Nginx, at each domain service
 ?? enforce RBAC using `X-Auth-*` headers for Downstream services (a JWT has 3 parts: header.payload.signature)
 
 Rollback procedure

@@ -15,5 +15,18 @@ done
   
 # CREATE CLUSTER AUTOCALING
 
-
 kubectl wait -n explore --for=condition=available deployment --all --timeout=600s
+
+for service in auth-service bff-marketing; do
+  kubectl describe deployment $service -n explore
+  kubectl describe svc $service -n explore
+  kubectl logs deployment/$service -n explore
+  kubectl logs svc/$service -n explore
+  #kubectl delete deployment $service -n explore
+  #kubectl delete svc $service -n explore
+done
+
+  #kubectl set env deployment --all -n explore POSTGRES_HOST=172.19.0.5 KAFKA_BOOTSTRAP_SERVERS=172.19.0.7
+  #kubectl set env deployment/auth-service -n explore REDIS_URL=redis://172.19.0.6:6379/0  
+  #kubectl scale deployment --all --replicas=1 -n explore
+  #kubectl delete hpa --all -n explore
