@@ -7,6 +7,6 @@ git status
 git add .                   # stage files using git add
 
 git commit -m "$MESSAGE"    # create a snapshot with git commit
-git push origin master      # upload it to the remote repository
+git push origin staging     # upload it to the remote repository
 
 echo "Git push Done - $MESSAGE"

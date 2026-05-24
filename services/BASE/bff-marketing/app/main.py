@@ -229,6 +229,12 @@ async def get_graphql_context(request: Request, response=None):
 graphql_app = GraphQLRouter(schema, context_getter=get_graphql_context)
 app.include_router(graphql_app, prefix="/graphql")
 
+# Promote GraphQL routes to the front so they match before the catch-all proxy
+graphql_paths = {"/graphql", "/graphql/"}
+for i, r in enumerate(app.router.routes):
+    if hasattr(r, "path") and r.path in graphql_paths:
+        app.router.routes.insert(0, app.router.routes.pop(i))
+
 
 @app.api_route('/{service_key}', methods=['GET', 'POST'])
 @app.api_route('/{service_key}/{path:path}', methods=['GET', 'POST'])

@@ -22,7 +22,6 @@ inconsistent payloads
 
 GraphQL asks:  Which data fields?
 POST /graphql
-Query (instead of Request):
 query DashboardQuery {
   me {    Id,     name,     roles   }
    orders {     Id,     status,     total   }
@@ -39,8 +38,4 @@ query depth limits
 caching layer 
 GraphQL federation (later stage)
 
-Please add GraphQL to the marketing-app and bff-marketing
-So the BFF becomes dual-mode:
-/api/*      -> REST
-/graphql    -> GraphQL
 Introducing gRPC / Protobuf gradually for migrated services while keeping REST/JSON for old services.

@@ -6,13 +6,13 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "3"
+    nginx.ingress.kubernetes.io/limit-rpm: "18000"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
     nginx.ingress.kubernetes.io/auth-url: "http://auth-service.explore.svc.cluster.local:7000/ingress/auth"
     nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-User-Id,X-Auth-User-Email,X-Auth-User-Name,X-Auth-Scopes,X-Auth-Identity-Source
-    nginx.ingress.kubernetes.io/limit-rps: "10"
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: "3"
-    nginx.ingress.kubernetes.io/limit-rpm: "600"
 spec:
   ingressClassName: nginx
   rules:

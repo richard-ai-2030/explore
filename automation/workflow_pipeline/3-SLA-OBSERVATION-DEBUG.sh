@@ -1,13 +1,12 @@
 #-------------- OBSERVE KUBERNETES --------------
-
 kubectl describe pod $(kubectl get pods -n explore | grep auth-service | awk '{print $1}' | head -n 1) -n explore
 kubectl logs $(kubectl get pods -n explore | grep auth-service | awk '{print $1}' | head -n 1) -n explore
- 
   
 kubectl exec -it auth-service-84b7cd99b4-x924k -n explore -- env | grep REDIS
 kubectl exec -it auth-service-75799cb866-25wlz -n explore -- /bin/bash
   apt update && apt install curl iputils-ping -y
   
+kubectl exec -n ingress-nginx -it ingress-nginx-controller-8bf94c74f-dpscs -- nginx -T | grep limit_req
 
 #-------------- OBSERVE REDIS --------------
 docker exec -it redis redis-cli MONITOR                         # execute command in an existing Docker container
