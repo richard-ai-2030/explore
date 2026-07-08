@@ -14,4 +14,4 @@ curl -s -f -X POST "$API/marketing/workflow/lead-to-order" -H "Authorization: Be
 
 curl -s -f -X GET "$API/marketing/dashboard" -H "Authorization: Bearer $token"
 
-echo "Smoke test passed."
+echo "Integration test passed."
