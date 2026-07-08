@@ -1,3 +1,12 @@
+# Build foundational SERVICES to Docker images
+./automation/agents/build-domain-services.sh BASE
+./automation/agents/build-domain-services.sh MARKETING
+
+# Load foundational IMAGES to K8s
+./automation/agents/load-images-k8s.sh BASE
+./automation/agents/load-images-k8s.sh MARKETING
+
+
 for service in BASE MARKETING PRODUCTION TALENTS ACCOUNTING; do
   ./automation/agents/build-domain-services.sh $service       # Re-build SERVICES to images
   ./automation/agents/load-images-k8s.sh $service             # Re-load IMAGES to K8S
@@ -13,7 +22,7 @@ for service in shared marketing production talents accounting; do
   #kubectl delete -k k8s/autoscaling/overlays/local/$service
 done
   
-# CREATE CLUSTER AUTOCALING
+# CREATE CLUSTER AUTOCALING  # CREATE CLUSTER AUTOCALING
 
 kubectl wait -n explore --for=condition=available deployment --all --timeout=600s
 
